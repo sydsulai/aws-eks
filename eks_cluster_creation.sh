@@ -30,3 +30,21 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --full-ecr-access \
                        --appmesh-access \
                        --alb-ingress-access
+
+eksctl create addon --name eks-pod-identity-agent --cluster app-cluster-01 --region ap-south-1
+
+eksctl create podidentityassociation \
+    --cluster "app-cluster-01" \
+    --namespace default \
+    --region "ap-south-1" \
+    --service-account-name eks-pod-identity-role-sa \
+    --role-arn $ROLE_ARN \
+    --create-service-account true
+
+eksctl create podidentityassociation \
+    --cluster "app-cluster-01" \
+    --namespace default \
+    --region "ap-south-1" \
+    --service-account-name eks-pod-identity-role-sa \
+    --role-arn $ROLE_ARN \
+    --create-service-account true

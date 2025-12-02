@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: usermgmt-microservice
+  namespace: app-namespace
+  labels:
+    app: usermgmt-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: usermgmt-restapp
+  template:  
+    metadata:
+      labels: 
+        app: usermgmt-restapp
+    spec:
+      containers:
+        - name: usermgmt-restapp
+          image: stacksimplify/kube-usermanagement-microservice:1.0.0
+          ports: 
+            - containerPort: 8095
+          env:
+            - name: DB_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-secrets-k8s
+                  key: DB_HOSTNAME
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-secrets-k8s
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-secrets-k8s
+                  key: DB_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-secrets-k8s
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-secrets-k8s
+                  key: DB_PASSWORD
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      serviceAccountName: eks-pod-identity-role-sa
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "ums-mysql-secrets"         
