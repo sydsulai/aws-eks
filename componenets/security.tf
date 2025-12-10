@@ -79,3 +79,24 @@ resource "aws_security_group" "app_vpc_private_sg" {
         cidr_blocks      = ["0.0.0.0/0"]
     }
 }
+
+resource "aws_security_group" "eks_rds_db_sg" {
+    name        = "eks_rds_db_sg"
+    description = "Allow access for RDS Database on Port 3306"
+    vpc_id      = aws_vpc.app_vpc.id
+
+    ingress {
+        description      = "Allow access for RDS Database on Port 3306"
+        from_port        = 3306
+        to_port          = 3306
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+    }
+}

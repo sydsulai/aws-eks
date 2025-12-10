@@ -10,10 +10,7 @@ resource "aws_iam_role" "eks_pod_identity_role" {
                 Principal = {
                     Service = "pods.eks.amazonaws.com"
                 }
-                Action = [
-                    "sts:AssumeRole",
-                    "sts:TagSession"
-                ]
+                Action = var.eks_pod_identity_role_action
             }
         ]
     })
@@ -32,10 +29,7 @@ resource "aws_iam_policy" "access_secret_policy" {
         Statement = [
             {
                 Effect = "Allow"
-                Action = [
-                    "secretsmanager:GetSecretValue",
-                    "secretsmanager:DescribeSecret"
-                ]
+                Action = var.access_secret_policy_actions
                 Resource = ["arn:aws:secretsmanager:ap-south-1:829007908826:secret:eks/ums/mysql-cQN6KZ"]
             }
         ]
@@ -64,10 +58,7 @@ resource "aws_iam_role" "eks_pod_identity_role_ebs_csi" {
                 Principal = {
                     Service = "pods.eks.amazonaws.com"
                 }
-                Action = [
-                    "sts:AssumeRole",
-                    "sts:TagSession"
-                ]
+                Action = var.eks_pod_identity_role_action
             }
         ]
     })

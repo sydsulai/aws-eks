@@ -23,3 +23,21 @@ private_ec2_name        = "private-ec2-instance"
 dhcp_option_set_name   = "app-vpc-dhcp-options"
 domain_name            = "corp.internal"
 domain_name_servers    = ["AmazonProvidedDNS"]
+eks_pod_identity_role_action = [
+    "sts:AssumeRole",
+    "sts:TagSession"
+]
+access_secret_policy_actions = [
+    "secretsmanager:GetSecretValue",
+    "secretsmanager:DescribeSecret"
+]
+eks_rds_db_sg_name = "eks-rds-db-sg"
+eks_rds_db_subnetgroup_name = "eks-rds-db-subnetgroup"
+rds_db_instance_identifier = "usermgmtdb"
+rds_db_name = "usermgmt"
+rds_db_username = "dbadmin"
+rds_db_password = "dbpassword11"
+rds_db_engine_version = "5.7.22"
+rds_db_instance_class = "db.t2.micro"
+rds_db_engine_name = "mysql"
+rds_db_allocated_storage = 10

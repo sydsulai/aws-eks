@@ -107,3 +107,64 @@ variable "domain_name_servers" {
     description = "Domain name servers for the Route private 53 hosted zone"
     type        = list(string)
 }
+
+variable "eks_pod_identity_role_action" {
+    description = "Actions for the EKS pod identity role"
+    type        = list(string)
+}
+
+variable "access_secret_policy_actions" {
+    description = "Actions for accessing secrets in Secrets Manager"
+    type        = list(string)
+}
+
+variable "eks_rds_db_sg_name" {
+    description = "Security group name for EKS RDS Database"
+    type        = string
+}
+
+variable "eks_rds_db_subnetgroup_name" {    
+    description = "Subnet group name for EKS RDS Database"
+    type        = string
+}
+
+variable "rds_db_instance_identifier" {
+    description = "RDS DB instance identifier"
+    type        = string
+}
+
+variable "rds_db_name" {
+    description = "Name of the RDS database"
+    type        = string
+}
+
+variable "rds_db_username" {
+    description = "Username for the RDS database"
+    type        = string
+}
+
+variable "rds_db_password" {
+    description = "Password for the RDS database"
+    type        = string
+}
+
+variable "rds_db_engine_version" {
+    description = "Database engine for RDS"
+    type        = string
+}
+
+variable "rds_db_instance_class" {
+    description = "Instance class for RDS"
+    type        = string
+}
+
+variable "rds_db_engine_name" {
+    description = "Database engine name for RDS"
+    type        = string
+}
+
+variable "rds_db_allocated_storage" {
+    description = "Allocated storage size for RDS in GB"
+    type        = number
+    default     = 10
+}
