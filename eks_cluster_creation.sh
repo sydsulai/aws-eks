@@ -50,11 +50,11 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --appmesh-access \
                        --alb-ingress-access
 
-eksctl create addon --name eks-pod-identity-agent --cluster app-cluster-01 --region ap-south-1
+eksctl create addon --name eks-pod-identity-agent --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role
 
-eksctl create addon --name aws-ebs-csi-driver --cluster app-cluster-01 --region ap-south-1
+eksctl create addon --name aws-ebs-csi-driver --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role-csi
 
-eksctl create addon --name aws-secrets-manager-csi-driver --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role
+eksctl create addon --name aws-secrets-store-csi-driver-provider --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role
 
 # Install AWS Secrets Store CSI Driver using Helm [Aws Managed Addon not available]
 helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
@@ -79,3 +79,26 @@ eksctl create podidentityassociation \
     --service-account-name eks-pod-identity-role-sa \
     --role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role \
     --create-service-account true
+
+# Delete addons
+
+eksctl delete addon --name eks-pod-identity-agent --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name aws-ebs-csi-driver --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name aws-secrets-store-csi-driver-provider --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name metrics-server --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name vpc-cni --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name coredns --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete addon --name kube-proxy --cluster app-cluster-01 --region ap-south-1
+
+eksctl delete nodegroup --cluster=app-cluster-01 \
+                       --region=ap-south-1 \
+                       --name=app-cluster-01-ng-private1
+
+eksctl delete cluster --name=app-cluster-01 \
+                     --region=ap-south-1 
