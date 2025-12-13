@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment 
 metadata:
   name: usermgmt-microservice
+  namespace: app-namespace
   labels:
     app: usermgmt-restapp
 spec:
@@ -20,23 +21,35 @@ spec:
           command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
       containers:
         - name: usermgmt-restapp
-          image: stacksimplify/kube-usermanagement-microservice:1.0.0  
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:1.0.0  
           ports: 
             - containerPort: 8095           
           env:
             - name: DB_HOSTNAME
-              value: "mysql"            
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_HOSTNAME
             - name: DB_PORT
-              value: "3306"            
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_PORT
             - name: DB_NAME
-              value: "usermgmt"            
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_NAME
             - name: DB_USERNAME
-              value: "dbadmin"        # RDS DB Username is dbadmin     
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_USERNAME
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-db-password
-                  key: db-password           
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_PASSWORD           
           livenessProbe:
             exec:
               command: 

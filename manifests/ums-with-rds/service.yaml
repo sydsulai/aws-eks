@@ -2,9 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
+  namespace: app-namespace
 spec:
   type: ExternalName
-  externalName: usermgmtdb.c7hldelt9xfp.us-east-1.rds.amazonaws.com
+  externalName: usermgmtdb.closcimyuuq0.ap-south-1.rds.amazonaws.com
 
 ---
 
@@ -12,6 +13,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: usermgmt-restapp-service
+  namespace: app-namespace
   labels: 
     app: usermgmt-restapp
 spec:

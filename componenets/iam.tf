@@ -22,7 +22,7 @@ resource "aws_iam_role" "eks_pod_identity_role" {
 
 # Attach Secrets Manager read access policy to the role
 resource "aws_iam_policy" "access_secret_policy" {
-    name = "nginx-deployment-policy"
+    name = "access-secret-policy"
     
     policy = jsonencode({
         Version = "2012-10-17"
@@ -30,7 +30,7 @@ resource "aws_iam_policy" "access_secret_policy" {
             {
                 Effect = "Allow"
                 Action = var.access_secret_policy_actions
-                Resource = ["arn:aws:secretsmanager:ap-south-1:829007908826:secret:eks/ums/mysql-cQN6KZ"]
+                Resource = ["arn:aws:secretsmanager:ap-south-1:829007908826:secret:*"]
             }
         ]
     })
@@ -48,7 +48,7 @@ resource "aws_iam_role_policy_attachment" "access_secret_policy_attachment" {
 }
 
 resource "aws_iam_role" "eks_pod_identity_role_ebs_csi" {
-    name = "eks-pod-identity-role"
+    name = "eks-pod-identity-role-csi"
 
     assume_role_policy = jsonencode({
         Version = "2012-10-17"

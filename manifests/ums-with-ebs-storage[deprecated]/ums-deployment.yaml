@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: usermgmt-restapp
-          image: stacksimplify/kube-usermanagement-microservice:1.0.0
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:1.0.0
           ports: 
             - containerPort: 8095
           env:
