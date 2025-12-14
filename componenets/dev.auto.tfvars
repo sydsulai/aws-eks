@@ -25,6 +25,7 @@ domain_name            = "corp.internal"
 domain_name_servers    = ["AmazonProvidedDNS"]
 eks_pod_identity_role_action = [
     "sts:AssumeRole",
+    "sts:AssumeRoleWithWebIdentity",
     "sts:TagSession"
 ]
 access_secret_policy_actions = [

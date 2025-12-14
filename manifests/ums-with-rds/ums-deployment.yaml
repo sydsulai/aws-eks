@@ -15,6 +15,7 @@ spec:
       labels: 
         app: usermgmt-restapp
     spec:
+      serviceAccountName: ums-pod-identity-deployment-sa
       initContainers:
         - name: init-db
           image: busybox:1.31
@@ -64,3 +65,14 @@ spec:
               port: 8095
             initialDelaySeconds: 60
             periodSeconds: 10
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "ums-mysql-rds-secrets"

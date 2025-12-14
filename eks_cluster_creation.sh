@@ -15,14 +15,14 @@ eksctl utils associate-iam-oidc-provider \
 eksctl create nodegroup --cluster=app-cluster-01 \
                        --region=ap-south-1 \
                        --name=app-cluster-01-ng-private1 \
-                       --node-type=t3.micro \
+                       --node-type=t3.2xlarge \
                        --nodes=2 \
                        --nodes-min=2 \
                        --nodes-max=4 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-019d2f62f16e40c52,subnet-0eae9c1f7fd38efe3 \
+                       --subnet-ids=subnet-0e69e2fad16b34a91,subnet-086c3158e3c9acdd9 \
                        --node-private-networking \
                        --managed \
                        --asg-access \
@@ -85,4 +85,16 @@ eksctl create addon --name aws-secrets-store-csi-driver-provider --cluster app-c
 #                        --name=app-cluster-01-ng-private1
 
 # eksctl delete cluster --name=app-cluster-01 \
-#                      --region=ap-south-1 
+#                      --region=ap-south-1
+
+
+eksctl create podidentityassociation \
+    --cluster app-cluster-01 \
+    --namespace app-namespace \
+    --region ap-south-1 \
+    --service-account-name ums-pod-identity-deployment-sa \
+    --role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role \
+    --create-service-account true
+
+eksctl create iamserviceaccount --name ums-pod-identity-deployment-sa  --namespace app-namespace --cluster app-cluster-01 \
+    --attach-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role --approve

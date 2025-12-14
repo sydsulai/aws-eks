@@ -11,6 +11,15 @@ resource "aws_iam_role" "eks_pod_identity_role" {
                     Service = "pods.eks.amazonaws.com"
                 }
                 Action = var.eks_pod_identity_role_action
+                Action = var.eks_pod_identity_role_action
+                Condition = {
+                    StringEquals = {
+                        "aws:SourceAccount" = "829007908826"
+                    }
+                    ArnEquals = {
+                        "aws:SourceArn" = "arn:aws:eks:ap-south-1:829007908826:cluster/app-cluster-01"
+                    }
+                }
             }
         ]
     })
@@ -59,6 +68,14 @@ resource "aws_iam_role" "eks_pod_identity_role_ebs_csi" {
                     Service = "pods.eks.amazonaws.com"
                 }
                 Action = var.eks_pod_identity_role_action
+                Condition = {
+                    StringEquals = {
+                        "aws:SourceAccount" = "829007908826"
+                    }
+                    ArnEquals = {
+                        "aws:SourceArn" = "arn:aws:eks:ap-south-1:829007908826:cluster/app-cluster-01"
+                    }
+                }
             }
         ]
     })
@@ -77,5 +94,10 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
 # Attach EKS Cluster policy to the role
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
     policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+    role       = aws_iam_role.eks_pod_identity_role_ebs_csi.name
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_ec2_full_access" {
+    policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
     role       = aws_iam_role.eks_pod_identity_role_ebs_csi.name
 }
