@@ -6,5 +6,7 @@ resource "aws_lb" "eks_nlb" {
 
   enable_deletion_protection = false
 
-  tags = var.tags
+  tags = merge(var.tags, {
+    "elbv2.k8s.aws/cluster" = "app-cluster-01"
+  })
 }
