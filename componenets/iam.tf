@@ -101,3 +101,8 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_ec2_full_access" {
     policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
     role       = aws_iam_role.eks_pod_identity_role_ebs_csi.name
 }
+
+resource "aws_iam_policy" "aws_load_balancer_controller_policy" {
+    name = "AWSLoadBalancerControllerIAMPolicy"
+    policy = file("iam_policy.json")
+}

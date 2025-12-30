@@ -52,17 +52,48 @@ eksctl create nodegroup --cluster=app-cluster-01 \
 
 eksctl create addon --name eks-pod-identity-agent --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role
 
-eksctl create addon --name aws-ebs-csi-driver --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role-csi
+# eksctl create addon --name aws-ebs-csi-driver --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role-csi
 
 eksctl create addon --name aws-secrets-store-csi-driver-provider --cluster app-cluster-01 --region ap-south-1 --service-account-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role
 
-# Install AWS Secrets Store CSI Driver using Helm [Aws Managed Addon not available]
-# helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
-# helm repo update
-# helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace kube-system
+eksctl create podidentityassociation \
+    --cluster app-cluster-01 \
+    --namespace app-namespace \
+    --region ap-south-1 \
+    --service-account-name ums-pod-identity-deployment-sa \
+    --role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role \
+    --create-service-account true
 
-# # Install AWS Secrets Store CSI Driver Provider
-# kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml
+eksctl create iamserviceaccount --name ums-pod-identity-deployment-sa  --namespace app-namespace --cluster app-cluster-01 \
+    --attach-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role --approve
+
+# AWS Load Balancer Controller
+# curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.14.1/docs/install/iam_policy.json
+
+# aws iam create-policy \
+#     --policy-name AWSLoadBalancerControllerIAMPolicy \
+#     --policy-document file://iam_policy.json
+
+eksctl create iamserviceaccount \
+    --cluster=app-cluster-01 \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --attach-policy-arn=arn:aws:iam::829007908826:policy/AWSLoadBalancerControllerIAMPolicy \
+    --override-existing-serviceaccounts \
+    --region ap-south-1 \
+    --approve
+
+helm repo add eks https://aws.github.io/eks-charts
+
+helm repo update eks
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=my-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --version 1.14.0
+
 
 # Delete addons
 
@@ -86,15 +117,3 @@ eksctl create addon --name aws-secrets-store-csi-driver-provider --cluster app-c
 
 # eksctl delete cluster --name=app-cluster-01 \
 #                      --region=ap-south-1
-
-
-eksctl create podidentityassociation \
-    --cluster app-cluster-01 \
-    --namespace app-namespace \
-    --region ap-south-1 \
-    --service-account-name ums-pod-identity-deployment-sa \
-    --role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role \
-    --create-service-account true
-
-eksctl create iamserviceaccount --name ums-pod-identity-deployment-sa  --namespace app-namespace --cluster app-cluster-01 \
-    --attach-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role --approve
