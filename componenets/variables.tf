@@ -180,3 +180,21 @@ variable network_loadbalancer_type {
     type        = string
     default     = "network"
 }
+
+variable network_loadbalancer_target_group_name {
+    description = "Name of the Network Load Balancer Target Group"
+    type        = string
+    default     = "eks-nlb-target-group"
+}
+
+variable network_loadbalancer_target_group_port {
+    description = "Port for the Network Load Balancer Target Group"
+    type        = number
+    default     = 8095
+}
+
+variable network_loadbalancer_target_group_protocol {
+    description = "Protocol for the Network Load Balancer Target Group"
+    type        = string
+    default     = "TCP"
+}

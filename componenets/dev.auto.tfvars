@@ -44,3 +44,6 @@ rds_db_engine_name = "mysql"
 rds_db_allocated_storage = 20
 network_loadbalancer_name = "eks-nlb"
 network_loadbalancer_type = "network"
+network_loadbalancer_target_group_name = "eks-nlb-target-group"
+network_loadbalancer_target_group_port = 8095
+network_loadbalancer_target_group_protocol = "TCP"

@@ -1,0 +1,11 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: ums-nlb-target-group-binding
+  namespace: app-namespace
+spec:
+  serviceRef:
+    name: usermgmt-restapp-service
+    port: 8095
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-south-1:829007908826:targetgroup/eks-nlb-target-group/494901ca00825d5f
+  targetType: ip
