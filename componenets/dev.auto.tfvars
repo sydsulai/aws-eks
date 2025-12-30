@@ -42,3 +42,5 @@ rds_db_engine_version = "5.7.44-rds.20240408"
 rds_db_instance_class = "db.t4g.micro"
 rds_db_engine_name = "mysql"
 rds_db_allocated_storage = 20
+network_loadbalancer_name = "eks-nlb"
+network_loadbalancer_type = "network"

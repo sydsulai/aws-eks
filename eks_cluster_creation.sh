@@ -2,8 +2,8 @@
 eksctl create cluster --name=app-cluster-01 \
                      --region=ap-south-1 \
                      --without-nodegroup \
-                     --vpc-public-subnets=subnet-0925ad4cd15601ca7,subnet-0fc9f295b764a1bf3 \
-                     --vpc-private-subnets=subnet-0e69e2fad16b34a91,subnet-086c3158e3c9acdd9
+                     --vpc-public-subnets=subnet-0d4478f3a5f58d8fd,subnet-0b2c40f7c2ab633b2 \
+                     --vpc-private-subnets=subnet-0ec98a1e0e5be71b9,subnet-05aef20d5f16faa08
 
 # OIDC Provider Creation
 eksctl utils associate-iam-oidc-provider \
@@ -22,7 +22,7 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0e69e2fad16b34a91,subnet-086c3158e3c9acdd9 \
+                       --subnet-ids=subnet-0ec98a1e0e5be71b9,subnet-05aef20d5f16faa08 \
                        --node-private-networking \
                        --managed \
                        --asg-access \
@@ -35,14 +35,14 @@ eksctl create nodegroup --cluster=app-cluster-01 \
 eksctl create nodegroup --cluster=app-cluster-01 \
                        --region=ap-south-1 \
                        --name=app-cluster-01-ng-public1 \
-                       --node-type=t3.micro \
+                       --node-type=t3.2xlarge \
                        --nodes=2 \
                        --nodes-min=2 \
                        --nodes-max=4 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0925ad4cd15601ca7,subnet-0fc9f295b764a1bf3 \
+                       --subnet-ids=subnet-0d4478f3a5f58d8fd,subnet-0b2c40f7c2ab633b2 \
                        --managed \
                        --asg-access \
                        --external-dns-access \

@@ -168,3 +168,15 @@ variable "rds_db_allocated_storage" {
     type        = number
     default     = 10
 }
+
+variable network_loadbalancer_name {
+    description = "Name of the Network Load Balancer"
+    type        = string
+    default     = "eks-nlb"
+}
+
+variable network_loadbalancer_type {
+    description = "Type of the Load Balancer"
+    type        = string
+    default     = "network"
+}
