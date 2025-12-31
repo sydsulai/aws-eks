@@ -106,3 +106,4 @@ resource "aws_iam_policy" "aws_load_balancer_controller_policy" {
     name = "AWSLoadBalancerControllerIAMPolicy"
     policy = file("iam_policy.json")
 }
+# Note: iam_policy.json = https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json
