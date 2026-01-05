@@ -89,10 +89,12 @@ helm repo update eks
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=my-cluster \
+  --set clusterName=app-cluster-01 \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
-  --version 1.14.0
+  --set region=ap-south-1 \
+  --set vpcId=vpc-0165a396e41e292a3 \
+  --set image.repository=public.ecr.aws/eks/aws-load-balancer-controller
 
 
 # Delete addons
