@@ -14,10 +14,27 @@ metadata:
     alb.ingress.kubernetes.io/success-codes: '200'
     alb.ingress.kubernetes.io/healthy-threshold-count: '2'
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    ## SSL
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn:
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # Ingress Groups
+    alb.ingress.kubernetes.io/group.name: myapps.web
+    alb.ingress.kubernetes.io/group.order: '10'
 spec:
   ingressClassName: app-default-alb-ingress-class
   defaultBackend:
     service:
-      name: app1-nginx-nodeport-service
+      name: usermgmt-restapp-service
       port:
-        number: 80
+        number: 31231
+  rules:
+    - http:
+        paths:
+        - path: /app1
+          pathType: Prefix
+          backend:
+            service:
+              name: app1-nginx-nodeport-service
+              port:
+                number: 80
