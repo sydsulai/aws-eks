@@ -2,8 +2,8 @@
 eksctl create cluster --name=app-cluster-01 \
                      --region=ap-south-1 \
                      --without-nodegroup \
-                     --vpc-public-subnets=subnet-0d4478f3a5f58d8fd,subnet-0b2c40f7c2ab633b2 \
-                     --vpc-private-subnets=subnet-0ec98a1e0e5be71b9,subnet-05aef20d5f16faa08
+                     --vpc-public-subnets=subnet-0181d26a8dce14585,subnet-05012f0e6908c9d6f \
+                     --vpc-private-subnets=subnet-0af2d9ffd0eb894fc,subnet-05653b12ed0f931e8
 
 # OIDC Provider Creation
 eksctl utils associate-iam-oidc-provider \
@@ -22,7 +22,7 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0ec98a1e0e5be71b9,subnet-05aef20d5f16faa08 \
+                       --subnet-ids=subnet-0af2d9ffd0eb894fc,subnet-05653b12ed0f931e8 \
                        --node-private-networking \
                        --managed \
                        --asg-access \
@@ -42,7 +42,7 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0d4478f3a5f58d8fd,subnet-0b2c40f7c2ab633b2 \
+                       --subnet-ids=subnet-0181d26a8dce14585,subnet-05012f0e6908c9d6f \
                        --managed \
                        --asg-access \
                        --external-dns-access \
@@ -93,7 +93,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=ap-south-1 \
-  --set vpcId=vpc-0165a396e41e292a3 \
+  --set vpcId=vpc-05240ee727b593500 \
   --set image.repository=public.ecr.aws/eks/aws-load-balancer-controller
 
 
