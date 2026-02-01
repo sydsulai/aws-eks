@@ -1,0 +1,8 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: app-cluster-01-fargate-profile
+fargateProfiles:
+  - name: app2-fargate-profile
+    selectors:
+      - namespace: app2-fargate-ns
