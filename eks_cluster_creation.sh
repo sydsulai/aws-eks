@@ -102,7 +102,12 @@ eksctl create fargateprofile \
     --cluster app-cluster-01 \
     --name app-cluster-01-fargate-profile \
     --region ap-south-1 \
-    --namespace app-fargate-namespace
+    --namespace app2-fargate-ns
+
+# Using Yaml File
+eksctl create fargateprofile -f manifests/fargate-profile.yaml
+
+eksctl get fargateprofile --cluster app-cluster-01 --region ap-south-1
 
 # Delete addons
 
@@ -127,7 +132,7 @@ eksctl create fargateprofile \
 # eksctl delete cluster --name=app-cluster-01 \
 #                      --region=ap-south-1
 
-# eksctl create fargateprofile \
+# eksctl delete fargateprofile \
 #     --cluster app-cluster-01 \
 #     --name app-cluster-01-fargate-profile \
 #     --wait

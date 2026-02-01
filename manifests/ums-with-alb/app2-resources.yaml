@@ -27,6 +27,13 @@ spec:
           image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/nginx:2.0.0
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "500m"
+            limits:
+              memory: "500Mi"
+              cpu: "1000m"
 
 ---
 
