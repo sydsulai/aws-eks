@@ -96,6 +96,13 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set vpcId=vpc-05240ee727b593500 \
   --set image.repository=public.ecr.aws/eks/aws-load-balancer-controller
 
+# Fargate Profile Creation
+
+eksctl create fargateprofile \
+    --cluster app-cluster-01 \
+    --name app-cluster-01-fargate-profile \
+    --region ap-south-1 \
+    --namespace app-fargate-namespace
 
 # Delete addons
 
@@ -119,3 +126,8 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 # eksctl delete cluster --name=app-cluster-01 \
 #                      --region=ap-south-1
+
+# eksctl create fargateprofile \
+#     --cluster app-cluster-01 \
+#     --name app-cluster-01-fargate-profile \
+#     --wait

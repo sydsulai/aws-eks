@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ums-ns
+
+---
+
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: ums-mysql-rds-secrets
+  namespace: ums-ns
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: eks/ums/rds
+        objectType: secretsmanager
+        jmesPath:
+          - path: host
+            objectAlias: hostname
+          - path: port
+            objectAlias: port
+          - path: dbname
+            objectAlias: dbname
+          - path: username
+            objectAlias: username
+          - path: password
+            objectAlias: password
+    usePodIdentity: "true"
+  secretObjects:  # Not good to use below format, just for checking adding this
+    - secretName: ums-mysql-rds-secrets-k8s
+      type: Opaque
+      data:
+        - objectName: hostname
+          key: DB_HOSTNAME
+        - objectName: port
+          key: DB_PORT
+        - objectName: dbname
+          key: DB_NAME
+        - objectName: username
+          key: DB_USERNAME
+        - objectName: password
+          key: DB_PASSWORD
+
+---
+
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: usermgmt-microservice
+  namespace: ums-ns
+  labels:
+    app: usermgmt-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: usermgmt-restapp
+  template:  
+    metadata:
+      labels: 
+        app: usermgmt-restapp
+    spec:
+      serviceAccountName: ums-pod-identity-deployment-sa
+      initContainers:
+        - name: init-db
+          image: busybox:1.31
+          command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
+      containers:
+        - name: usermgmt-restapp
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:1.0.0  
+          ports: 
+            - containerPort: 8095           
+          env:
+            - name: DB_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_HOSTNAME
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ums-mysql-rds-secrets-k8s
+                  key: DB_PASSWORD
+            # - name: NOTIFICATION_SERVICE_HOST
+            #   value: "notification-clusterip-service"
+            # - name: NOTIFICATION_SERVICE_PORT
+            #   value: "8096"           
+          livenessProbe:
+            exec:
+              command: 
+                - /bin/sh
+                - -c 
+                - nc -z localhost 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /usermgmt/health-status
+              port: 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "ums-mysql-rds-secrets"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: ums-ns
+spec:
+  type: ExternalName
+  externalName: usermgmtdb.closcimyuuq0.ap-south-1.rds.amazonaws.com
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: usermgmt-restapp-service
+  namespace: ums-ns
+  labels: 
+    app: usermgmt-restapp
+spec:
+  type: NodePort
+  selector:
+    app: usermgmt-restapp
+  ports: 
+    - port: 8095
+      targetPort: 8095
+      nodePort: 31231
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shared-ingress-resources
+  namespace: ums-ns
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/load-balancer-name: shared-external-alb
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-path: /app1/index.html
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    # SSL Annotations
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # alb.ingress.kubernetes.io/listen-ports: [{'HTTPS':443, 'HTTP':80}]
+    # alb.ingress.kubernetes.io/certificate-arn:
+    # Ingress Groups
+    alb.ingress.kubernetes.io/group.name: app-ingress-group
+    alb.ingress.kubernetes.io/group.order: '30'
+spec:
+  ingressClassName: app-default-alb-ingress-class
+  defaultBackend:
+    service:
+      name: usermgmt-restapp-service
+      port:
+        number: 8095
