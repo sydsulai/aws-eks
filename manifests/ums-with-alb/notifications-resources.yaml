@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: notifications-service-smtp-settings
+  type: Opaque
+data:
+  SMTP_ENDPOINT: ZW1haWwtc210cC5hcC1zb3V0aC0xLmFtYXpvbmF3cy5jb20=
+  SMTP_USERNAME: QUtJQTRDQkZZWjdOTFFEUjJLVjU=
+  SMTP_PASSWORD: QkVpZ3o0RlpPSWJ4ZmRhQUJ1VUpOTWlkT2ZsZDlGRkd1d2N2WXMyejJodno=
+  SMTP_SERVER_MAIL_FROM_ADDRESS: c3lkcG9ydDExQGdtYWlsLmNvbQ==
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications-smtp-endpoint
+spec:
+  type: ExternalName
+  externalName: email-smtp.ap-south-1.amazonaws.com
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-microservice
+  labels:
+    app: notification-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-restapp
+  template:
+    metadata:
+      labels:
+        app: notification-restapp
+    spec:
+      containers:
+        - name: notification-service
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/notifications-microservice:1.0.0
+          ports:
+            - containerPort: 8096
+          imagePullPolicy: Always
+          env:
+            - name: AWS_MAIL_SERVER_HOST
+              value: "notifications-smtp-endpoint"
+            - name: AWS_MAIL_SERVER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_USERNAME
+            - name: AWS_MAIL_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_PASSWORD
+            - name: AWS_MAIL_SERVER_FROM_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_SERVER_MAIL_FROM_ADDRESS
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: notification-restapp
+  ports:
+    - protocol: TCP
+      port: 8096
+      targetPort: 8096
+
+# Notification microservice will not be called directly by end users and its not included in ingress controller.
