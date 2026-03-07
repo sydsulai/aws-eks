@@ -2,8 +2,8 @@
 eksctl create cluster --name=app-cluster-01 \
                      --region=ap-south-1 \
                      --without-nodegroup \
-                     --vpc-public-subnets=subnet-0181d26a8dce14585,subnet-05012f0e6908c9d6f \
-                     --vpc-private-subnets=subnet-0af2d9ffd0eb894fc,subnet-05653b12ed0f931e8
+                     --vpc-public-subnets=subnet-0af197a3bbe08f692,subnet-06c66793742fd437b \
+                     --vpc-private-subnets=subnet-08b693ebf0ad80178,subnet-06615f67ddb7964aa
 
 # OIDC Provider Creation
 eksctl utils associate-iam-oidc-provider \
@@ -22,7 +22,7 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0af2d9ffd0eb894fc,subnet-05653b12ed0f931e8 \
+                       --subnet-ids=subnet-08b693ebf0ad80178,subnet-06615f67ddb7964aa \
                        --node-private-networking \
                        --managed \
                        --asg-access \
@@ -42,7 +42,7 @@ eksctl create nodegroup --cluster=app-cluster-01 \
                        --node-volume-size=20 \
                        --ssh-access \
                        --ssh-public-key=my-vpc-01-keypair \
-                       --subnet-ids=subnet-0181d26a8dce14585,subnet-05012f0e6908c9d6f \
+                       --subnet-ids=subnet-0af197a3bbe08f692,subnet-06c66793742fd437b \
                        --managed \
                        --asg-access \
                        --external-dns-access \
@@ -93,8 +93,17 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=ap-south-1 \
-  --set vpcId=vpc-05240ee727b593500 \
+  --set vpcId=vpc-077116fa56d8feb2a \
   --set image.repository=public.ecr.aws/eks/aws-load-balancer-controller
+
+eksctl create iamserviceaccount \
+    --cluster=app-cluster-01 \
+    --namespace=default \
+    --name=xray-daemon \
+    --attach-policy-arn=arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
+    --override-existing-serviceaccounts \
+    --region ap-south-1 \
+    --approve
 
 # Fargate Profile Creation
 

@@ -101,7 +101,13 @@ spec:
             - name: NOTIFICATION_SERVICE_HOST
               value: "notification-clusterip-service"
             - name: NOTIFICATION_SERVICE_PORT
-              value: "8096"           
+              value: "8096"
+            - name: AWS_XRAY_TRACING_NAME 
+              value: "user-management-microservice"                
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: "xray-service.default:2000"    
+            - name: AWS_XRAY_CONTEXT_MISSING 
+              value: "LOG_ERROR"          
           livenessProbe:
             exec:
               command: 

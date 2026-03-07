@@ -61,6 +61,12 @@ spec:
                 secretKeyRef:
                   name: notifications-service-smtp-settings
                   key: SMTP_SERVER_MAIL_FROM_ADDRESS
+            - name: AWS_XRAY_TRACING_NAME 
+              value: "v1-notification-microservice"                
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: "xray-service.default:2000"      
+            - name: AWS_XRAY_CONTEXT_MISSING 
+              value: "LOG_ERROR" 
 
 ---
 
