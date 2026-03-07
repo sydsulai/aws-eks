@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: notifications-ns
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: notifications-service-smtp-settings
+  namespace: notifications-ns
+type: Opaque
+data:
+  SMTP_ENDPOINT: <Placeholder for SMTP Endpoint> # Not used as we are using ExternalName service to refer to SMTP endpoint, but added here just for reference.
+  SMTP_USERNAME: <PlaceHolder for SMTP Username>
+  SMTP_PASSWORD: <PlaceHolder for SMTP Password>
+  SMTP_SERVER_MAIL_FROM_ADDRESS: <PlaceHolder for SMTP Server Mail From Address>
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications-smtp-endpoint
+  namespace: notifications-ns
+spec:
+  type: ExternalName
+  externalName: email-smtp.ap-south-1.amazonaws.com
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-microservice
+  namespace: notifications-ns
+  labels:
+    app: notification-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-restapp
+  template:
+    metadata:
+      labels:
+        app: notification-restapp
+    spec:
+      containers:
+        - name: notification-service
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/notifications-microservice:3.0.0
+          ports:
+            - containerPort: 8096
+          imagePullPolicy: Always
+          env:
+            - name: AWS_MAIL_SERVER_HOST
+              value: "notifications-smtp-endpoint"
+            - name: AWS_MAIL_SERVER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_USERNAME
+            - name: AWS_MAIL_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_PASSWORD
+            - name: AWS_MAIL_SERVER_FROM_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-service-smtp-settings
+                  key: SMTP_SERVER_MAIL_FROM_ADDRESS
+            - name: AWS_XRAY_TRACING_NAME 
+              value: "v1-notification-microservice"                
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: "xray-service.default:2000"      
+            - name: AWS_XRAY_CONTEXT_MISSING 
+              value: "LOG_ERROR" 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-clusterip-service
+  namespace: notifications-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: notification-restapp
+  ports:
+    - protocol: TCP
+      port: 8096
+      targetPort: 8096
+
+# Notification microservice will not be called directly by end users and its not included in ingress controller.

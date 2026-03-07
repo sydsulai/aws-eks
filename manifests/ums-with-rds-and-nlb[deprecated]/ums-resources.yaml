@@ -69,7 +69,7 @@ spec:
           command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
       containers:
         - name: usermgmt-restapp
-          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:2.0.0
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:1.0.0  
           ports: 
             - containerPort: 8095           
           env:
@@ -98,16 +98,10 @@ spec:
                 secretKeyRef:
                   name: ums-mysql-rds-secrets-k8s
                   key: DB_PASSWORD
-            - name: NOTIFICATION_SERVICE_HOST
-              value: "notification-clusterip-service"
-            - name: NOTIFICATION_SERVICE_PORT
-              value: "8096"
-            - name: AWS_XRAY_TRACING_NAME 
-              value: "user-management-microservice"                
-            - name: AWS_XRAY_DAEMON_ADDRESS
-              value: "xray-service.default:2000"    
-            - name: AWS_XRAY_CONTEXT_MISSING 
-              value: "LOG_ERROR"          
+            # - name: NOTIFICATION_SERVICE_HOST
+            #   value: "notification-clusterip-service"
+            # - name: NOTIFICATION_SERVICE_PORT
+            #   value: "8096"           
           livenessProbe:
             exec:
               command: 
@@ -140,7 +134,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
-  namespace: ums-ns
+  namespace: app-namespace
 spec:
   type: ExternalName
   externalName: usermgmtdb.closcimyuuq0.ap-south-1.rds.amazonaws.com
@@ -150,48 +144,49 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: usermgmt-restapp-service
-  namespace: ums-ns
-  labels: 
-    app: usermgmt-restapp
-spec:
-  type: NodePort
-  selector:
-    app: usermgmt-restapp
-  ports: 
-    - port: 8095
-      targetPort: 8095
-      nodePort: 31231
-
----
-
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: shared-ingress-resources
-  namespace: ums-ns
+  name: shared-external-nlb
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/load-balancer-name: shared-external-alb
-    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
-    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
-    alb.ingress.kubernetes.io/healthcheck-path: /usermgmt/health-status
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
-    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
-    alb.ingress.kubernetes.io/success-codes: '200'
-    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
-    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
-    # SSL Annotations
-    # alb.ingress.kubernetes.io/ssl-redirect: '443'
-    # alb.ingress.kubernetes.io/listen-ports: [{'HTTPS':443, 'HTTP':80}]
-    # alb.ingress.kubernetes.io/certificate-arn:
-    # Ingress Groups
-    alb.ingress.kubernetes.io/group.name: app-ingress-group
-    alb.ingress.kubernetes.io/group.order: '30'
+    # Traffic Routing
+    service.beta.kubernetes.io/aws-load-balancer-name: shared-external-nlb
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+    #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-xxxx, mySubnet ## Subnets are auto-discovered if this annotation is not specified, see Subnet Discovery for further details.
+    
+    # Health Check Settings
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: traffic-port
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /index.html
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10" # The controller currently ignores the timeout configuration due to the limitations on the AWS NLB. The default timeout for TCP is 10s and HTTP is 6s.
+
+    # Access Control
+    service.beta.kubernetes.io/load-balancer-source-ranges: 0.0.0.0/0 
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+    # AWS Resource Tags
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: Environment=dev,Team=test
+
+    # TLS
+    # service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:180789647333:certificate/d86de939-8ffd-410f-adce-0ce1f5be6e0d # specifies the ARN of one or more certificates managed by the AWS Certificate Manager.
+    # service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 443, # Specify this annotation if you need both TLS and non-TLS listeners on the same load balancer
+    # service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: ELBSecurityPolicy-TLS13-1-2-2021-06 # specifies the Security Policy for NLB frontend connections, allowing you to control the protocol and ciphers.
+    # service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp # specifies whether to use TLS or TCP for the backend traffic between the load balancer and the kubernetes pods.
 spec:
-  ingressClassName: app-default-alb-ingress-class
-  defaultBackend:
-    service:
-      name: usermgmt-restapp-service
-      port:
-        number: 8095
+  type: LoadBalancer
+  selector:
+    app: app3-nginx
+  ports:
+    - name: http
+      port: 80        # Creates NLB Port 80 Listener
+      targetPort: 80  # Creates NLB Port 80 Target Group-1  
+    - name: https
+      port: 443       # Creates NLB Port 443 Listener
+      targetPort: 80  # Creates NLB Port 80 Target Group-2   
+    - name: http81
+      port: 81        # Creates NLB Port 81 Listener
+      targetPort: 80  # Creates NLB Port 80 Target Group-3  
+    - name: http82
+      port: 82        # Creates NLB Port 82 Listener
+      targetPort: 80  # Creates NLB Port 80 Target Group-4    
+
