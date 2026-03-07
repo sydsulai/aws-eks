@@ -58,13 +58,13 @@ eksctl create addon --name aws-secrets-store-csi-driver-provider --cluster app-c
 
 eksctl create podidentityassociation \
     --cluster app-cluster-01 \
-    --namespace app-namespace \
+    --namespace ums-ns \
     --region ap-south-1 \
     --service-account-name ums-pod-identity-deployment-sa \
     --role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role \
     --create-service-account true
 
-eksctl create iamserviceaccount --name ums-pod-identity-deployment-sa  --namespace app-namespace --cluster app-cluster-01 \
+eksctl create iamserviceaccount --name ums-pod-identity-deployment-sa  --namespace ums-ns --cluster app-cluster-01 \
     --attach-role-arn arn:aws:iam::829007908826:role/eks-pod-identity-role --approve
 
 # AWS Load Balancer Controller

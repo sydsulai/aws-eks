@@ -12,10 +12,10 @@ metadata:
   namespace: notifications-ns
 type: Opaque
 data:
-  SMTP_ENDPOINT: ZW1haWwtc210cC5hcC1zb3V0aC0xLmFtYXpvbmF3cy5jb20=
-  SMTP_USERNAME: QUtJQTRDQkZZWjdOTFFEUjJLVjU=
-  SMTP_PASSWORD: QkVpZ3o0RlpPSWJ4ZmRhQUJ1VUpOTWlkT2ZsZDlGRkd1d2N2WXMyejJodno=
-  SMTP_SERVER_MAIL_FROM_ADDRESS: c3lkcG9ydDExQGdtYWlsLmNvbQ==
+  SMTP_ENDPOINT: <Placeholder for SMTP Endpoint> # Not used as we are using ExternalName service to refer to SMTP endpoint, but added here just for reference.
+  SMTP_USERNAME: <PlaceHolder for SMTP Username>
+  SMTP_PASSWORD: <PlaceHolder for SMTP Password>
+  SMTP_SERVER_MAIL_FROM_ADDRESS: <PlaceHolder for SMTP Server Mail From Address>
 
 ---
 
