@@ -1,14 +1,15 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    app: xray-daemon
-  name: xray-daemon
-  namespace: default
-  # Update IAM Role ARN created for X-Ray access
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::829007908826:role/eksctl-eksdemo1-addon-iamserviceaccount-defa-Role1-VR2R60B6MMDV
----
+# Commenting this out as the ServiceAccount is being created using eksctl command in eks_cluster_creation.sh script. If you want to create the ServiceAccount using this manifest, please uncomment the below code and update the IAM Role ARN in the annotation section.
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   labels:
+#     app: xray-daemon
+#   name: xray-daemon
+#   namespace: default
+#   # Update IAM Role ARN created for X-Ray access
+#   annotations:
+#     eks.amazonaws.com/role-arn: arn:aws:iam::829007908826:role/eksctl-eksdemo1-addon-iamserviceaccount-defa-Role1-VR2R60B6MMDV
+# ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

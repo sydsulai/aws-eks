@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/notifications-microservice:1.0.0
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/notifications-microservice:3.0.0
           ports:
             - containerPort: 8096
           imagePullPolicy: Always
