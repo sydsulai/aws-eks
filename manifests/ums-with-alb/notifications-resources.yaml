@@ -12,10 +12,10 @@ metadata:
   namespace: notifications-ns
 type: Opaque
 data:
-  SMTP_ENDPOINT: ZW1haWwtc210cC5hcC1zb3V0aC0xLmFtYXpvbmF3cy5jb20=
-  SMTP_USERNAME: QUtJQTRDQkZZWjdOTFFEUjJLVjU=
-  SMTP_PASSWORD: QkVpZ3o0RlpPSWJ4ZmRhQUJ1VUpOTWlkT2ZsZDlGRkd1d2N2WXMyejJodno=
-  SMTP_SERVER_MAIL_FROM_ADDRESS: c3lkcG9ydDExQGdtYWlsLmNvbQ==
+  SMTP_ENDPOINT: <Add the SMTP endpoint of AWS SES in base64 format>
+  SMTP_USERNAME: <Add the SMTP username of AWS SES in base64 format>
+  SMTP_PASSWORD: <Add the SMTP password of AWS SES in base64 format>
+  SMTP_SERVER_MAIL_FROM_ADDRESS: <Add the SMTP server mail from address in base64 format>
 
 ---
 
