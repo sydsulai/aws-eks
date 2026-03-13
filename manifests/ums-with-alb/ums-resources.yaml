@@ -99,7 +99,7 @@ spec:
                   name: ums-mysql-rds-secrets-k8s
                   key: DB_PASSWORD
             - name: NOTIFICATION_SERVICE_HOST
-              value: "notification-clusterip-service"
+              value: "notification-clusterip-service.notifications-ns"
             - name: NOTIFICATION_SERVICE_PORT
               value: "8096"
             - name: AWS_XRAY_TRACING_NAME 

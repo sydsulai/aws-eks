@@ -12,10 +12,10 @@ metadata:
   namespace: notifications-ns
 type: Opaque
 data:
-  SMTP_ENDPOINT: <Placeholder for SMTP Endpoint> # Not used as we are using ExternalName service to refer to SMTP endpoint, but added here just for reference.
-  SMTP_USERNAME: <PlaceHolder for SMTP Username>
-  SMTP_PASSWORD: <PlaceHolder for SMTP Password>
-  SMTP_SERVER_MAIL_FROM_ADDRESS: <PlaceHolder for SMTP Server Mail From Address>
+  SMTP_ENDPOINT: <Add the SMTP endpoint of AWS SES in base64 format>
+  SMTP_USERNAME: <Add the SMTP username of AWS SES in base64 format>
+  SMTP_PASSWORD: <Add the SMTP password of AWS SES in base64 format>
+  SMTP_SERVER_MAIL_FROM_ADDRESS: <Add the SMTP server mail from address in base64 format>
 
 ---
 
@@ -50,6 +50,13 @@ spec:
       containers:
         - name: notification-service
           image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/notifications-microservice:3.0.0
+          resources:
+            requests:
+              cpu: 4m
+              memory: 1000Mi
+            limits:
+              cpu: 6m
+              memory: 1200Mi
           ports:
             - containerPort: 8096
           imagePullPolicy: Always
