@@ -5,136 +5,136 @@ metadata:
 
 ---
 
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: ums-mysql-rds-secrets
-  namespace: ums-ns
-spec:
-  provider: aws
-  parameters:
-    objects: |
-      - objectName: eks/ums/rds
-        objectType: secretsmanager
-        jmesPath:
-          - path: host
-            objectAlias: hostname
-          - path: port
-            objectAlias: port
-          - path: dbname
-            objectAlias: dbname
-          - path: username
-            objectAlias: username
-          - path: password
-            objectAlias: password
-    usePodIdentity: "true"
-  secretObjects:  # Not good to use below format, just for checking adding this
-    - secretName: ums-mysql-rds-secrets-k8s
-      type: Opaque
-      data:
-        - objectName: hostname
-          key: DB_HOSTNAME
-        - objectName: port
-          key: DB_PORT
-        - objectName: dbname
-          key: DB_NAME
-        - objectName: username
-          key: DB_USERNAME
-        - objectName: password
-          key: DB_PASSWORD
+# apiVersion: secrets-store.csi.x-k8s.io/v1
+# kind: SecretProviderClass
+# metadata:
+#   name: ums-mysql-rds-secrets
+#   namespace: ums-ns
+# spec:
+#   provider: aws
+#   parameters:
+#     objects: |
+#       - objectName: eks/ums/rds
+#         objectType: secretsmanager
+#         jmesPath:
+#           - path: host
+#             objectAlias: hostname
+#           - path: port
+#             objectAlias: port
+#           - path: dbname
+#             objectAlias: dbname
+#           - path: username
+#             objectAlias: username
+#           - path: password
+#             objectAlias: password
+#     usePodIdentity: "true"
+#   secretObjects:  # Not good to use below format, just for checking adding this
+#     - secretName: ums-mysql-rds-secrets-k8s
+#       type: Opaque
+#       data:
+#         - objectName: hostname
+#           key: DB_HOSTNAME
+#         - objectName: port
+#           key: DB_PORT
+#         - objectName: dbname
+#           key: DB_NAME
+#         - objectName: username
+#           key: DB_USERNAME
+#         - objectName: password
+#           key: DB_PASSWORD
 
----
+# ---
 
-apiVersion: apps/v1
-kind: Deployment 
-metadata:
-  name: usermgmt-microservice
-  namespace: ums-ns
-  labels:
-    app: usermgmt-restapp
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: usermgmt-restapp
-  template:  
-    metadata:
-      labels: 
-        app: usermgmt-restapp
-    spec:
-      serviceAccountName: ums-pod-identity-deployment-sa
-      initContainers:
-        - name: init-db
-          image: busybox:1.31
-          command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
-      containers:
-        - name: usermgmt-restapp
-          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:2.0.0
-          ports: 
-            - containerPort: 8095           
-          env:
-            - name: DB_HOSTNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ums-mysql-rds-secrets-k8s
-                  key: DB_HOSTNAME
-            - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: ums-mysql-rds-secrets-k8s
-                  key: DB_PORT
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: ums-mysql-rds-secrets-k8s
-                  key: DB_NAME
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ums-mysql-rds-secrets-k8s
-                  key: DB_USERNAME
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ums-mysql-rds-secrets-k8s
-                  key: DB_PASSWORD
-            - name: NOTIFICATION_SERVICE_HOST
-              value: "notification-clusterip-service"
-            - name: NOTIFICATION_SERVICE_PORT
-              value: "8096"
-            - name: AWS_XRAY_TRACING_NAME 
-              value: "user-management-microservice"                
-            - name: AWS_XRAY_DAEMON_ADDRESS
-              value: "xray-service.default:2000"    
-            - name: AWS_XRAY_CONTEXT_MISSING 
-              value: "LOG_ERROR"          
-          livenessProbe:
-            exec:
-              command: 
-                - /bin/sh
-                - -c 
-                - nc -z localhost 8095
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /usermgmt/health-status
-              port: 8095
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          volumeMounts:
-            - name: secrets-store-inline
-              mountPath: "/mnt/secrets-store"
-              readOnly: true
-      volumes:
-        - name: secrets-store-inline
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "ums-mysql-rds-secrets"
+# apiVersion: apps/v1
+# kind: Deployment 
+# metadata:
+#   name: usermgmt-microservice
+#   namespace: ums-ns
+#   labels:
+#     app: usermgmt-restapp
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: usermgmt-restapp
+#   template:  
+#     metadata:
+#       labels: 
+#         app: usermgmt-restapp
+#     spec:
+#       serviceAccountName: ums-pod-identity-deployment-sa
+#       initContainers:
+#         - name: init-db
+#           image: busybox:1.31
+#           command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
+#       containers:
+#         - name: usermgmt-restapp
+#           image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:2.0.0
+#           ports: 
+#             - containerPort: 8095           
+#           env:
+#             - name: DB_HOSTNAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: ums-mysql-rds-secrets-k8s
+#                   key: DB_HOSTNAME
+#             - name: DB_PORT
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: ums-mysql-rds-secrets-k8s
+#                   key: DB_PORT
+#             - name: DB_NAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: ums-mysql-rds-secrets-k8s
+#                   key: DB_NAME
+#             - name: DB_USERNAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: ums-mysql-rds-secrets-k8s
+#                   key: DB_USERNAME
+#             - name: DB_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: ums-mysql-rds-secrets-k8s
+#                   key: DB_PASSWORD
+#             - name: NOTIFICATION_SERVICE_HOST
+#               value: "notification-clusterip-service.notifications-ns"
+#             - name: NOTIFICATION_SERVICE_PORT
+#               value: "8096"
+#             - name: AWS_XRAY_TRACING_NAME 
+#               value: "user-management-microservice"                
+#             - name: AWS_XRAY_DAEMON_ADDRESS
+#               value: "xray-service.default:2000"    
+#             - name: AWS_XRAY_CONTEXT_MISSING 
+#               value: "LOG_ERROR"          
+#           livenessProbe:
+#             exec:
+#               command: 
+#                 - /bin/sh
+#                 - -c 
+#                 - nc -z localhost 8095
+#             initialDelaySeconds: 60
+#             periodSeconds: 10
+#           readinessProbe:
+#             httpGet:
+#               path: /usermgmt/health-status
+#               port: 8095
+#             initialDelaySeconds: 60
+#             periodSeconds: 10
+#           volumeMounts:
+#             - name: secrets-store-inline
+#               mountPath: "/mnt/secrets-store"
+#               readOnly: true
+#       volumes:
+#         - name: secrets-store-inline
+#           csi:
+#             driver: secrets-store.csi.k8s.io
+#             readOnly: true
+#             volumeAttributes:
+#               secretProviderClass: "ums-mysql-rds-secrets"
 
----
+# ---
 
 apiVersion: v1
 kind: Service
@@ -195,3 +195,82 @@ spec:
       name: usermgmt-restapp-service
       port:
         number: 8095
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-db-password
+  namespace: ums-ns
+type: Opaque
+data: 
+  db-password: ZGJwYXNzd29yZDEx
+
+---
+
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: usermgmt-microservice
+  namespace: ums-ns
+  labels:
+    app: usermgmt-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: usermgmt-restapp
+  template:  
+    metadata:
+      labels: 
+        app: usermgmt-restapp
+    spec:
+      serviceAccountName: ums-pod-identity-deployment-sa
+      initContainers:
+        - name: init-db
+          image: busybox:1.31
+          command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
+      containers:
+        - name: usermgmt-restapp
+          image: 829007908826.dkr.ecr.ap-south-1.amazonaws.com/eks/ums:2.0.0
+          ports: 
+            - containerPort: 8095           
+          env:
+            - name: DB_HOSTNAME
+              value: "mysql"            
+            - name: DB_PORT
+              value: "3306"            
+            - name: DB_NAME
+              value: "usermgmt"            
+            - name: DB_USERNAME
+              value: "dbadmin"        # RDS DB Username is dbadmin     
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-db-password
+                  key: db-password
+            - name: NOTIFICATION_SERVICE_HOST
+              value: "notification-clusterip-service.notifications-ns"
+            - name: NOTIFICATION_SERVICE_PORT
+              value: "8096"
+            - name: AWS_XRAY_TRACING_NAME 
+              value: "user-management-microservice"                
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: "xray-service.default:2000"    
+            - name: AWS_XRAY_CONTEXT_MISSING 
+              value: "LOG_ERROR"          
+          livenessProbe:
+            exec:
+              command: 
+                - /bin/sh
+                - -c 
+                - nc -z localhost 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /usermgmt/health-status
+              port: 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10

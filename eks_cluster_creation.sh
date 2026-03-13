@@ -105,6 +105,22 @@ eksctl create iamserviceaccount \
     --region ap-south-1 \
     --approve
 
+# Metrics Server
+kubectl -n kube-system get deployment/metrics-server
+
+# eksctl create addon --name metrics-server --cluster app-cluster-01 --region ap-south-1
+# kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+
+# VPA
+git clone https://github.com/kubernetes/autoscaler.git
+cd autoscaler/vertical-pod-autoscaler/
+./hack/vpa-down.sh
+./hack/vpa-up.sh
+
+# Cluster Autoscaler
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-autoscaler/cloudprovider/aws/examples/cluster-autoscaler-autodiscover.yaml
+kubectl -n kube-system annotate deployment.apps/cluster-autoscaler cluster-autoscaler.kubernetes.io/safe-to-evict="false"
+
 # Fargate Profile Creation
 
 eksctl create fargateprofile \
@@ -144,4 +160,4 @@ eksctl get fargateprofile --cluster app-cluster-01 --region ap-south-1
 # eksctl delete fargateprofile \
 #     --cluster app-cluster-01 \
 #     --name app-cluster-01-fargate-profile \
-#     --wait
+    # --wait

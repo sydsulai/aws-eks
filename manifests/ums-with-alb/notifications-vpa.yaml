@@ -1,0 +1,21 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: notification-microservice-vpa
+  namespace: notifications-ns
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: notification-microservice
+  resourcePolicy:
+    containerPolicies:
+      - containerName: notification-microservice
+        minAllowed:
+          cpu: 6m
+          memory: 1200Mi
+        maxAllowed:
+          cpu: 10m
+          memory: 1400Mi
+        controlledResources: ["cpu", "memory"]
+        controlledValues: "Requests" # By Default, the VPA will recommend changes to the resource requests of the container. If you set this field to "Limits", the VPA will recommend changes to the resource limits of the container.
