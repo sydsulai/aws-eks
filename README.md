@@ -17,17 +17,16 @@ Directory: https://github.com/sydsulai/centralized-platform/tree/main/app-cluste
 ```
 eks/
 ├── README.md                         # This file
-└── manifests/
-    ├── dummy-app1/                   # Sample nginx application
-    │   └── app1-resources.yaml
-    ├── dummy-app2/                   # Second sample application
-    │   └── app2-resources.yaml
-    ├── notifications-services/       # Email notification microservice
-    │   ├── notifications-resources.yaml
-    │   ├── notifications-hpa.yaml
-    │   └── notifications-vpa.yaml
-    └── usermanagement-services/      # User management microservice
-        └── ums-resources.yaml
+├── dummy-app1/                       # Sample nginx application
+│   └── app1-resources.yaml
+├── dummy-app2/                       # Second sample application
+│   └── app2-resources.yaml
+├── notifications-services/           # Email notification microservice
+│   ├── notifications-resources.yaml
+│   ├── notifications-hpa.yaml
+│   └── notifications-vpa.yaml
+└── usermanagement-services/          # User management microservice
+  └── ums-resources.yaml
 ```
 
 ## 📋 Manifests Overview
@@ -125,20 +124,26 @@ eks/
 **Deploy all manifests:**
 
 ```bash
-kubectl apply -f manifests/
+kubectl apply -f dummy-app1/
+kubectl apply -f dummy-app2/
+kubectl apply -f notifications-services/
+kubectl apply -f usermanagement-services/
 ```
 
 **Deploy specific service:**
 
 ```bash
 # Deploy Dummy App 1
-kubectl apply -f manifests/dummy-app1/
+kubectl apply -f dummy-app1/
+
+# Deploy Dummy App 2
+kubectl apply -f dummy-app2/
 
 # Deploy Notifications Service
-kubectl apply -f manifests/notifications-services/
+kubectl apply -f notifications-services/
 
 # Deploy User Management Service
-kubectl apply -f manifests/usermanagement-services/
+kubectl apply -f usermanagement-services/
 ```
 
 ### Verify Deployment
