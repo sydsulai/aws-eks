@@ -21,6 +21,8 @@ eks/
 │   └── app1-resources.yaml
 ├── dummy-app2/                       # Second sample application
 │   └── app2-resources.yaml
+├── fleetman/                         # Fleetman microservices stack
+│   └── application-fullstack.yaml
 ├── notifications-services/           # Email notification microservice
 │   ├── notifications-resources.yaml
 │   ├── notifications-hpa.yaml
@@ -110,6 +112,18 @@ eks/
 
 ---
 
+### 5. Fleetman Manifests (`fleetman/application-fullstack.yaml`)
+
+**Purpose:** Fleet tracking demo stack with web UI and backend microservices
+
+**Resources:**
+
+- **Deployments:** `position-simulator`, `position-tracker`, `api-gateway`, `webapp`, `vehicle-telemetry`, `staff-service`
+- **Services:** `fleetman-webapp`, `fleetman-position-tracker`, `fleetman-api-gateway`, `fleetman-vehicle-telemetry`, `fleetman-staff-service`
+- **Architecture Constraint:** Fleetman pods are pinned to x86_amd64 only (`kubernetes.io/arch: amd64`)
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -128,6 +142,7 @@ kubectl apply -f dummy-app1/
 kubectl apply -f dummy-app2/
 kubectl apply -f notifications-services/
 kubectl apply -f usermanagement-services/
+kubectl apply -f fleetman/
 ```
 
 **Deploy specific service:**
@@ -144,6 +159,9 @@ kubectl apply -f notifications-services/
 
 # Deploy User Management Service
 kubectl apply -f usermanagement-services/
+
+# Deploy Fleetman stack
+kubectl apply -f fleetman/
 ```
 
 ### Verify Deployment
