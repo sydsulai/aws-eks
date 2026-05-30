@@ -1,3 +1,7 @@
+## First two resources are for weighted routing along with the header match. 
+## This route traffic to the safe version of the service for 25% of the traffic and to the risky version for 75% of the traffic. 
+## The header match is for testing purposes, you can set the header x-user-version to safe or risky to route all traffic to that version.
+
 kind: DestinationRule
 apiVersion: networking.istio.io/v1
 metadata:
@@ -23,14 +27,163 @@ metadata:
   name: fleetman-staff-service
 spec:
   http:
+  - match:
+    - headers:
+        x-user-version:
+          exact: safe
+    route:
+    - destination:
+        host: fleetman-staff-service.default.svc.cluster.local
+        subset: safe
+  - match:
+    - headers:
+        x-user-version:
+          exact: risky
+    route:
+    - destination:
+        host: fleetman-staff-service.default.svc.cluster.local
+        subset: risky
   - route:
     - destination:
         host: fleetman-staff-service.default.svc.cluster.local
         subset: safe
-      weight: 0
+      weight: 25
     - destination:
         host: fleetman-staff-service.default.svc.cluster.local
         subset: risky
-      weight: 100
+      weight: 75
   hosts:
   - fleetman-staff-service.default.svc.cluster.local
+
+---
+## Gateways Configuration for UI application which is being used as EdgeProxy.
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: ingress-gateway-configuration
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: fleetman-webapp-virtual-service
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - ingress-gateway-configuration
+  http:
+  - match:
+    - uri:
+        prefix: "/experimental"
+    - uri:
+        prefix: "/canary"
+    route:
+    - destination:
+        host: fleetman-webapp
+        subset: experimental
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: fleetman-webapp
+        subset: original
+
+---
+kind: DestinationRule
+apiVersion: networking.istio.io/v1
+metadata:
+  name: fleetman-webapp-destination-rule
+  namespace: default
+spec:
+  host: fleetman-webapp
+  subsets:
+    - labels:
+        version: original
+      name: original
+    - labels:
+        version: experimental
+      name: experimental
+
+---
+
+## Dark Releases
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: fleetman-staff-service
+  namespace: default
+spec:
+  hosts:
+    - fleetman-staff-service
+  http:
+    - match:
+        - headers:
+            x-my-header:
+              exact: canary
+      route:
+        - destination:
+            host: fleetman-staff-service
+            subset: safe
+    - route:
+        - destination:
+            host: fleetman-staff-service
+            subset: risky
+---
+kind: DestinationRule
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: fleetman-staff-service
+  namespace: default
+spec:
+  host: fleetman-staff-service
+  subsets:
+    - labels:
+        version: safe
+      name: safe
+    - labels:
+        version: risky
+      name: risky
+
+## Circuit Breaker for staff-service.
+## This will eject the instance from the load balancing pool if it returns 5xx errors for 2 consecutive requests.
+## The instance will be ejected for 30 seconds and a maximum of 50% of the instances can be ejected at a time. The interval between ejection analysis is 10 seconds.
+---
+
+kind: DestinationRule
+apiVersion: networking.istio.io/v1
+metadata:
+  name: cb-fleetman-staff-service
+  namespace: default
+spec:
+  host: fleetman-staff-service.default.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+
+---
+### Enabling mTLS for the entire mesh.
+### This will enforce mTLS for all the services in the mesh.
+### If a service does not have a sidecar proxy, it will not be able to communicate with other services in the mesh.
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT
