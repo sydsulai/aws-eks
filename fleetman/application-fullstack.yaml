@@ -80,6 +80,7 @@ spec:
     metadata:
       labels:
         app: webapp
+        version: original
     spec:
       containers:
       - name: webapp
@@ -127,8 +128,8 @@ spec:
         version: safe
     spec:
       containers:
-      - image: richardchesterwood/istio-fleetman-staff-service:6-placeholder
-        name: staff-service        
+      - name: staff-service
+        image: richardchesterwood/istio-fleetman-staff-service:6
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice
@@ -153,7 +154,7 @@ spec:
     spec:
       containers:
       - name: staff-service
-        image: richardchesterwood/istio-fleetman-staff-service:6
+        image: richardchesterwood/istio-fleetman-staff-service:6-bad
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice
@@ -174,7 +175,6 @@ spec:
   ports:
     - name: http
       port: 80
-      nodePort: 30080
   type: NodePort
 ---
 apiVersion: v1
